@@ -92,7 +92,7 @@ public class MqttToKafkaAdapter {
             availableTopics.forEach(this::persistTopicsOnMongoAndCreateKafkaTopics);
         }else{
             //at this point all topics are created on kafka and should be persisted on mongo. So pushing every message on the respective kafka topic
-//            messageProducer.sendMessage(); //TODO check
+            messageProducer.sendMessage(topic,mqttMessage);
         }
     }
 

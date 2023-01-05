@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import mqtt.kafka.adapter.model.Message;
 import org.apache.kafka.clients.admin.Admin;
 import org.apache.kafka.clients.admin.NewTopic;
+import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.support.SendResult;
@@ -18,13 +19,13 @@ import java.util.concurrent.CompletableFuture;
 public class KafkaMessageProducer {
 
     @Autowired
-    private KafkaTemplate<String, Message> kafkaTemplate;
+    private KafkaTemplate<String, MqttMessage> kafkaTemplate;
 
     @Autowired
     private Admin kafkaAdmin;
 
-    public void sendMessage(Message message) {
-        CompletableFuture<SendResult<String, Message>> future = kafkaTemplate.send(message.getTopic(), message);
+    public void sendMessage(String topic,MqttMessage message) {
+        CompletableFuture<SendResult<String, MqttMessage>> future = kafkaTemplate.send(topic, message);
         //TODO check if we need to add error handling
     }
 
