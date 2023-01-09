@@ -2,7 +2,9 @@ package mqtt.kafka.adapter;
 
 
 import static mqtt.kafka.adapter.util.Constants.AVAILABLE_TOPICS;
+import static mqtt.kafka.adapter.util.Constants.CLIENT_STATION_IDENTIFIER_TOPIC;
 import static mqtt.kafka.adapter.util.Constants.COMMA_DELIMITER;
+import static mqtt.kafka.adapter.util.Constants.DASH_DELIMITER;
 
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
@@ -90,6 +92,10 @@ public class MqttToKafkaAdapter {
         if(AVAILABLE_TOPICS.equalsIgnoreCase(topic)){
             List<String> availableTopics = Arrays.stream(new String(mqttMessage.getPayload()).split(COMMA_DELIMITER)).toList();
             availableTopics.forEach(this::persistTopicsOnMongoAndCreateKafkaTopics);
+        }else if(CLIENT_STATION_IDENTIFIER_TOPIC.equalsIgnoreCase(topic)){
+            List<String> clientRef = Arrays.stream(new String(mqttMessage.getPayload()).split(DASH_DELIMITER)).toList();
+            //list has on 0 the client id and on 1 the station id
+            //need to check if we need this thing
         }else{
             //at this point all topics are created on kafka and should be persisted on mongo. So pushing every message on the respective kafka topic
             messageProducer.sendMessage(topic,mqttMessage);
