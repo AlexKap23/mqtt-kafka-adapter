@@ -94,6 +94,8 @@ public class MqttToKafkaAdapter {
         if(AVAILABLE_TOPICS.equalsIgnoreCase(topic)){
             List<String> availableTopics = Arrays.stream(new String(mqttMessage.getPayload()).split(COMMA_DELIMITER)).toList();
             availableTopics.forEach(this::persistTopicsOnMongoAndCreateKafkaTopics);
+            //sending available topics on everyone that listens to this topic in case they need to handle them (weather app will do handle them)
+            messageProducer.sendMessage(AVAILABLE_TOPICS,new Message(AVAILABLE_TOPICS,new String(mqttMessage.getPayload()),null,null));
         }else if(CLIENT_STATION_IDENTIFIER_TOPIC.equalsIgnoreCase(topic)){
             List<String> clientRef = Arrays.stream(new String(mqttMessage.getPayload()).split(DASH_DELIMITER)).toList();
             //list has on 0 the client id and on 1 the station id
@@ -107,7 +109,7 @@ public class MqttToKafkaAdapter {
             String clientId = mqttMessagePayloadParts[0];
             String stationId = mqttMessagePayloadParts[1];
             String sensorValue = mqttMessagePayloadParts[2];
-            Message msg = new Message(topic,clientId,stationId,sensorValue);
+            Message msg = new Message(topic,sensorValue,clientId,stationId);
             messageProducer.sendMessage(topic,msg);
         }
     }
