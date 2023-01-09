@@ -8,9 +8,11 @@ import static mqtt.kafka.adapter.util.Constants.DASH_DELIMITER;
 
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
+import mqtt.kafka.adapter.model.Message;
 import mqtt.kafka.adapter.model.Topic;
 import mqtt.kafka.adapter.kafka.producer.KafkaMessageProducer;
 import mqtt.kafka.adapter.repository.TopicRepository;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.eclipse.paho.client.mqttv3.IMqttClient;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
@@ -98,7 +100,15 @@ public class MqttToKafkaAdapter {
             //need to check if we need this thing
         }else{
             //at this point all topics are created on kafka and should be persisted on mongo. So pushing every message on the respective kafka topic
-            messageProducer.sendMessage(topic,mqttMessage);
+            String [] mqttMessagePayloadParts = new String (mqttMessage.getPayload()).split(DASH_DELIMITER);
+            if(ArrayUtils.isEmpty(mqttMessagePayloadParts) || mqttMessagePayloadParts.length<3){
+                return;
+            }
+            String clientId = mqttMessagePayloadParts[0];
+            String stationId = mqttMessagePayloadParts[1];
+            String sensorValue = mqttMessagePayloadParts[2];
+            Message msg = new Message(topic,clientId,stationId,sensorValue);
+            messageProducer.sendMessage(topic,msg);
         }
     }
 

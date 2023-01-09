@@ -39,7 +39,7 @@ public class KafkaConfig {
     private String kafkaGroup;
 
     @Bean
-    public ProducerFactory<String, MqttMessage> messageProducerFactory() {
+    public ProducerFactory<String, Message> messageProducerFactory() {
         Map<String, Object> configProps = new HashMap<>();
         configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaServer);
         configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
@@ -48,22 +48,22 @@ public class KafkaConfig {
     }
 
     @Bean
-    public KafkaTemplate<String, MqttMessage> messageKafkaTemplate() {
+    public KafkaTemplate<String, Message> messageKafkaTemplate() {
         return new KafkaTemplate<>(messageProducerFactory());
     }
 
     @Bean
-    public ConsumerFactory<? super String, ? super MqttMessage> messageConsumerFactory() {
+    public ConsumerFactory<? super String, ? super Message> messageConsumerFactory() {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaServer);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, kafkaGroup);
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, EARLIEST);
-        return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), new JsonDeserializer(MqttMessage.class));
+        return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), new JsonDeserializer(Message.class));
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, MqttMessage> messageKafkaListenerContainerFactory() {
-        ConcurrentKafkaListenerContainerFactory<String, MqttMessage> factory = new ConcurrentKafkaListenerContainerFactory<>();
+    public ConcurrentKafkaListenerContainerFactory<String, Message> messageKafkaListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, Message> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(messageConsumerFactory());
         return factory;
     }

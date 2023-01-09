@@ -19,13 +19,13 @@ import java.util.concurrent.CompletableFuture;
 public class KafkaMessageProducer {
 
     @Autowired
-    private KafkaTemplate<String, MqttMessage> kafkaTemplate;
+    private KafkaTemplate<String, Message> kafkaTemplate;
 
     @Autowired
     private Admin kafkaAdmin;
 
-    public void sendMessage(String topic,MqttMessage message) {
-        CompletableFuture<SendResult<String, MqttMessage>> future = kafkaTemplate.send(topic, message);
+    public void sendMessage(String topic,Message message) {
+        CompletableFuture<SendResult<String, Message>> future = kafkaTemplate.send(topic, message);
         //TODO check if we need to add error handling
     }
 
