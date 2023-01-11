@@ -82,6 +82,7 @@ public class MqttToKafkaAdapter {
             if(!subscriber.isConnected()){
                 subscriber.connect(options);
             }
+            subscriber.subscribe(AVAILABLE_TOPICS);
             String[] allAvailable = topicRepository.findAll().stream().map(Topic::getTopicName).toArray(String[]::new);
             subscriber.subscribe(allAvailable);
         } catch (MqttException e) {
@@ -102,7 +103,7 @@ public class MqttToKafkaAdapter {
             //need to check if we need this thing
         }else{
             //at this point all topics are created on kafka and should be persisted on mongo. So pushing every message on the respective kafka topic
-            String [] mqttMessagePayloadParts = new String (mqttMessage.getPayload()).split(DASH_DELIMITER);
+            String [] mqttMessagePayloadParts = (new String (mqttMessage.getPayload())).split(DASH_DELIMITER);
             if(ArrayUtils.isEmpty(mqttMessagePayloadParts) || mqttMessagePayloadParts.length<3){
                 return;
             }
@@ -117,10 +118,14 @@ public class MqttToKafkaAdapter {
     @Transactional
     public void persistTopicsOnMongoAndCreateKafkaTopics(String topic){
         if(StringUtils.isEmpty(topic)) return;
-        if(Objects.isNull(topicRepository.findByTopicName(topic))){
-            topicRepository.save(new Topic(topic));
-            //create kafka topic
-            messageProducer.createKafkaTopic(topic,1,1); //need to check about partitions and replication factor
+        try{
+            if(Objects.isNull(topicRepository.findByTopicName(topic))){
+                topicRepository.save(new Topic(topic));
+                //create kafka topic
+                messageProducer.createKafkaTopic(topic,1,1); //need to check about partitions and replication factor
+            }
+        }catch (Exception e){
+            log.error("exception caught while persisting data to mongo");
         }
     }
 }

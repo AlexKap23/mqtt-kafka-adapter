@@ -10,6 +10,6 @@ import java.util.List;
 public interface TopicRepository extends MongoRepository<Topic,String> {
 
     @Query("{topicName: '?0'}")
-    List<Topic> findByTopicName(String topicName);
+    Topic findByTopicName(String topicName);
 
 }
